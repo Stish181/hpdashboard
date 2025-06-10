@@ -4,14 +4,6 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mic, MicOff, X, Volume2, VolumeX } from "lucide-react"
-import {
-  Room,
-  RoomEvent,
-  type RemoteParticipant,
-  type LocalParticipant,
-  type RemoteTrackPublication,
-  type LocalTrack,
-} from "livekit-client"
 
 interface VoiceAssistantProps {
   isOpen: boolean
@@ -24,135 +16,186 @@ export default function VoiceAssistant({ isOpen, onClose }: VoiceAssistantProps)
   const [isMuted, setIsMuted] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState<string[]>([])
-  const [response, setResponse] = useState("")
-  const roomRef = useRef<Room | null>(null)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const recognitionRef = useRef<any>(null)
 
-  // Connect to LiveKit room
+  // Initialize speech recognition when component opens
   useEffect(() => {
     if (isOpen && !isConnected && !isConnecting) {
-      connectToLiveKit()
+      connectToVoiceAssistant()
     }
 
     return () => {
-      if (roomRef.current) {
-        roomRef.current.disconnect()
-        roomRef.current = null
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop()
+        } catch (error) {
+          // Ignore errors when stopping
+        }
       }
     }
   }, [isOpen])
 
-  const connectToLiveKit = async () => {
+  const connectToVoiceAssistant = async () => {
     try {
       setIsConnecting(true)
 
-      // In a real implementation, you would fetch this token from your server
-      const token = "DEMO_TOKEN" // Replace with actual token from your backend
+      // Check if browser supports speech recognition
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
 
-      const room = new Room({
-        adaptiveStream: true,
-        dynacast: true,
-        publishDefaults: {
-          simulcast: true,
-          audioPreset: { maxBitrate: 128_000, maxSampleRate: 48000 },
-        },
-      })
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition()
+        recognition.continuous = false
+        recognition.interimResults = false
+        recognition.lang = "en-US"
 
-      room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript
+          addMessage("You", transcript)
+          setIsListening(false)
+          setIsProcessing(true)
 
-      await room.connect("wss://your-livekit-server.com", token)
-      console.log("Connected to LiveKit room")
+          // Simulate Clara's response based on user input
+          setTimeout(() => {
+            generateClaraResponse(transcript)
+            setIsProcessing(false)
+          }, 1500)
+        }
 
-      roomRef.current = room
+        recognition.onerror = (event: any) => {
+          console.error("Speech recognition error:", event.error)
+          setIsListening(false)
+          setIsProcessing(false)
+        }
+
+        recognition.onend = () => {
+          setIsListening(false)
+        }
+
+        recognitionRef.current = recognition
+      }
+
+      // Simulate connection delay
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
       setIsConnected(true)
       setIsConnecting(false)
 
-      // Simulate Clara's initial greeting
+      // Clara's initial greeting
       setTimeout(() => {
-        addMessage("Clara", "Hello! I'm Clara, your healthcare assistant. How can I help you today?")
-      }, 1000)
+        addMessage(
+          "Clara",
+          "Hello! I'm Clara, your healthcare assistant. How can I help you today? You can click the microphone button to speak with me.",
+        )
+      }, 500)
     } catch (error) {
-      console.error("Failed to connect to LiveKit:", error)
+      console.error("Failed to initialize voice assistant:", error)
       setIsConnecting(false)
+      // Still allow the assistant to work in text mode
+      setIsConnected(true)
+      addMessage(
+        "Clara",
+        "Hello! I'm Clara, your healthcare assistant. Speech recognition isn't available, but I'm here to help you. How are you feeling today?",
+      )
     }
   }
 
-  const handleTrackSubscribed = (
-    track: LocalTrack,
-    publication: RemoteTrackPublication,
-    participant: RemoteParticipant | LocalParticipant,
-  ) => {
-    if (track.kind === "audio" && audioRef.current) {
-      track.attach(audioRef.current)
+  const generateClaraResponse = (userInput: string) => {
+    const input = userInput.toLowerCase()
+    let response = ""
+
+    if (input.includes("headache") || input.includes("head")) {
+      response =
+        "I'm sorry to hear about your headache. Can you tell me how long you've been experiencing this? Are you also having any nausea, sensitivity to light, or vision changes?"
+    } else if (input.includes("fever") || input.includes("temperature")) {
+      response =
+        "A fever can be concerning. Have you taken your temperature? Are you experiencing any other symptoms like chills, body aches, or fatigue?"
+    } else if (input.includes("cough") || input.includes("throat")) {
+      response =
+        "I understand you're having throat or cough issues. Is it a dry cough or are you bringing up mucus? Any difficulty swallowing or breathing?"
+    } else if (input.includes("stomach") || input.includes("nausea") || input.includes("sick")) {
+      response =
+        "Stomach issues can be uncomfortable. Are you experiencing nausea, vomiting, or abdominal pain? When did these symptoms start?"
+    } else if (input.includes("appointment") || input.includes("doctor")) {
+      response =
+        "I can help you find the right care. Based on your symptoms, would you like me to help you schedule an appointment with your primary care doctor or find an urgent care location?"
+    } else if (input.includes("emergency") || input.includes("urgent")) {
+      response =
+        "If this is a medical emergency, please call 911 immediately. For urgent but non-emergency care, I can help you find the nearest urgent care center or emergency room."
+    } else {
+      response =
+        "Thank you for sharing that with me. Can you tell me more about your symptoms? For example, when did they start and how severe are they on a scale of 1 to 10?"
     }
+
+    addMessage("Clara", response)
+    speakResponse(response)
   }
 
-  const toggleMicrophone = async () => {
-    if (!roomRef.current) return
-
-    try {
-      if (isMuted) {
-        // Unmute microphone
-        await roomRef.current.localParticipant.setMicrophoneEnabled(true)
-        setIsMuted(false)
-      } else {
-        // Mute microphone
-        await roomRef.current.localParticipant.setMicrophoneEnabled(false)
-        setIsMuted(true)
-      }
-    } catch (error) {
-      console.error("Error toggling microphone:", error)
-    }
+  const toggleMicrophone = () => {
+    setIsMuted(!isMuted)
   }
 
   const startListening = async () => {
-    if (!roomRef.current) return
+    if (!recognitionRef.current) {
+      addMessage(
+        "Clara",
+        "Speech recognition isn't available in your browser. You can still type your symptoms or questions, and I'll help guide you to the right care.",
+      )
+      return
+    }
 
     try {
-      // Request microphone permissions and publish audio
-      await roomRef.current.localParticipant.setMicrophoneEnabled(true)
       setIsListening(true)
-      setIsMuted(false)
-
-      // Simulate user speaking (in a real app, this would be captured from the microphone)
-      setTimeout(() => {
-        addMessage("You", "I've been having a headache for the past two days.")
-        stopListening()
-
-        // Simulate Clara's response
-        setTimeout(() => {
-          addMessage(
-            "Clara",
-            "I'm sorry to hear that. Could you tell me if you're experiencing any other symptoms like nausea, sensitivity to light, or blurred vision?",
-          )
-        }, 1500)
-      }, 3000)
+      recognitionRef.current.start()
     } catch (error) {
-      console.error("Error starting microphone:", error)
+      console.error("Error starting speech recognition:", error)
       setIsListening(false)
+      addMessage(
+        "Clara",
+        "I'm having trouble with speech recognition. Can you try again or tell me how you're feeling?",
+      )
     }
   }
 
   const stopListening = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop()
+      } catch (error) {
+        // Ignore errors when stopping
+      }
+    }
     setIsListening(false)
   }
 
   const addMessage = (sender: string, message: string) => {
     setTranscript((prev) => [...prev, `${sender}: ${message}`])
-    if (sender === "Clara") {
-      setResponse(message)
-      // In a real implementation, you would use the Web Speech API to speak the response
-      speakResponse(message)
-    }
   }
 
   const speakResponse = (text: string) => {
-    // In a real implementation, this would use the Web Speech API or stream audio from LiveKit
-    if ("speechSynthesis" in window) {
+    if ("speechSynthesis" in window && !isMuted) {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel()
+
       const utterance = new SpeechSynthesisUtterance(text)
-      utterance.rate = 1.0
+      utterance.rate = 0.9
       utterance.pitch = 1.0
-      utterance.volume = 1.0
+      utterance.volume = 0.8
+
+      // Use a female voice if available
+      const voices = window.speechSynthesis.getVoices()
+      const femaleVoice = voices.find(
+        (voice) =>
+          voice.name.toLowerCase().includes("female") ||
+          voice.name.toLowerCase().includes("woman") ||
+          voice.name.toLowerCase().includes("samantha") ||
+          voice.name.toLowerCase().includes("karen"),
+      )
+
+      if (femaleVoice) {
+        utterance.voice = femaleVoice
+      }
+
       window.speechSynthesis.speak(utterance)
     }
   }
@@ -175,14 +218,17 @@ export default function VoiceAssistant({ isOpen, onClose }: VoiceAssistantProps)
           <div className="bg-gray-50 rounded-lg p-4 h-64 overflow-y-auto">
             {transcript.map((message, index) => (
               <div key={index} className={`mb-3 ${message.startsWith("Clara:") ? "text-blue-700" : "text-gray-700"}`}>
-                {message}
+                <div className={`p-2 rounded-lg ${message.startsWith("Clara:") ? "bg-blue-50" : "bg-white border"}`}>
+                  {message}
+                </div>
               </div>
             ))}
-            {isListening && <div className="text-gray-500 italic">Listening...</div>}
+            {isListening && (
+              <div className="text-center text-blue-600 italic animate-pulse">🎤 Listening... Speak now</div>
+            )}
+            {isProcessing && <div className="text-center text-gray-500 italic animate-pulse">Clara is thinking...</div>}
             {isConnecting && <div className="text-center text-gray-500">Connecting to Clara...</div>}
           </div>
-
-          <audio ref={audioRef} autoPlay />
 
           <div className="text-center">
             {isConnected ? (
@@ -192,11 +238,12 @@ export default function VoiceAssistant({ isOpen, onClose }: VoiceAssistantProps)
                   size="lg"
                   className="rounded-full w-14 h-14 flex items-center justify-center"
                   onClick={isListening ? stopListening : startListening}
+                  disabled={isProcessing}
                 >
                   {isListening ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
                 </Button>
                 <Button
-                  variant="outline"
+                  variant={isMuted ? "destructive" : "outline"}
                   size="lg"
                   className="rounded-full w-14 h-14 flex items-center justify-center"
                   onClick={toggleMicrophone}
@@ -205,10 +252,14 @@ export default function VoiceAssistant({ isOpen, onClose }: VoiceAssistantProps)
                 </Button>
               </div>
             ) : (
-              <Button disabled={isConnecting} onClick={connectToLiveKit}>
+              <Button disabled={isConnecting} onClick={connectToVoiceAssistant}>
                 {isConnecting ? "Connecting..." : "Connect to Clara"}
               </Button>
             )}
+          </div>
+
+          <div className="text-xs text-gray-500 text-center">
+            {isListening ? "Speak clearly into your microphone" : "Click the microphone to start speaking"}
           </div>
         </CardContent>
         <CardFooter className="text-xs text-gray-500 text-center">

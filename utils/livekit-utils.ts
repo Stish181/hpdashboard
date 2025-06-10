@@ -1,37 +1,38 @@
-import { Room, type RoomOptions } from "livekit-client"
-
-// Default room options
-const defaultRoomOptions: RoomOptions = {
-  adaptiveStream: true,
-  dynacast: true,
-  publishDefaults: {
-    simulcast: true,
-    audioPreset: { maxBitrate: 128_000, maxSampleRate: 48000 },
-  },
+// Mock LiveKit utilities for demo purposes
+export interface MockRoom {
+  connected: boolean
+  participants: string[]
 }
 
-// Function to create and connect to a LiveKit room
-export async function connectToRoom(
-  url: string,
-  token: string,
-  options: RoomOptions = defaultRoomOptions,
-): Promise<Room> {
-  const room = new Room(options)
+// Function to create a mock room connection
+export async function connectToRoom(url: string, token: string): Promise<MockRoom> {
+  // Simulate connection delay
+  await new Promise((resolve) => setTimeout(resolve, 1000))
 
-  try {
-    await room.connect(url, token)
-    console.log("Connected to LiveKit room")
-    return room
-  } catch (error) {
-    console.error("Failed to connect to LiveKit room:", error)
-    throw error
+  console.log(`Mock connection to ${url} with token: ${token}`)
+
+  return {
+    connected: true,
+    participants: ["Clara", "User"],
   }
 }
 
-// Function to get a LiveKit token from your backend
+// Function to simulate getting a LiveKit token
 export async function getLiveKitToken(username: string): Promise<string> {
-  // In a real implementation, you would fetch this from your backend
-  // For demo purposes, we're returning a placeholder
-  console.log(`Getting LiveKit token for user: ${username}`)
-  return "DEMO_TOKEN"
+  console.log(`Getting mock LiveKit token for user: ${username}`)
+  return `mock_token_${username}_${Date.now()}`
+}
+
+// Mock audio utilities
+export function setupMockAudio() {
+  return {
+    startRecording: () => console.log("Mock: Started recording"),
+    stopRecording: () => console.log("Mock: Stopped recording"),
+    playAudio: (text: string) => {
+      if ("speechSynthesis" in window) {
+        const utterance = new SpeechSynthesisUtterance(text)
+        window.speechSynthesis.speak(utterance)
+      }
+    },
+  }
 }
