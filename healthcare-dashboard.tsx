@@ -9,6 +9,7 @@ import { useAuth } from "./contexts/auth-context"
 import { useState } from "react"
 import DashboardPage from "./components/dashboard-page"
 import PlanPage from "./components/plan-page"
+import VoiceAssistant from "./components/voice-assistant"
 
 function UserMenu() {
   const { user, logout } = useAuth()
@@ -51,11 +52,10 @@ function UserMenu() {
 export default function Component() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState("dashboard")
+  const [isVoiceAssistantOpen, setIsVoiceAssistantOpen] = useState(false)
 
   const handleOpenSupportChat = () => {
-    // Handle support chat click - same functionality as bottom right icon
-    console.log("Clara/Support chat clicked")
-    alert("Clara AI Assistant would open here - connecting you to personalized healthcare guidance!")
+    setIsVoiceAssistantOpen(true)
   }
 
   if (!user) {
@@ -203,6 +203,7 @@ export default function Component() {
           <img src="/support-icon.png" alt="Customer Support" className="w-12 h-12" />
         </Button>
       </div>
+      <VoiceAssistant isOpen={isVoiceAssistantOpen} onClose={() => setIsVoiceAssistantOpen(false)} />
     </div>
   )
 }
