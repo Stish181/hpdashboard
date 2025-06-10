@@ -52,6 +52,12 @@ export default function Component() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState("dashboard")
 
+  const handleOpenSupportChat = () => {
+    // Handle support chat click - same functionality as bottom right icon
+    console.log("Clara/Support chat clicked")
+    alert("Clara AI Assistant would open here - connecting you to personalized healthcare guidance!")
+  }
+
   if (!user) {
     return null // This will be handled by the main app component
   }
@@ -123,7 +129,7 @@ export default function Component() {
 
       {/* Content based on active tab */}
       {activeTab === "dashboard" ? (
-        <DashboardPage />
+        <DashboardPage onOpenSupportChat={handleOpenSupportChat} />
       ) : activeTab === "care" ? (
         /* Your care team content */
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -192,11 +198,7 @@ export default function Component() {
         <Button
           size="lg"
           className="w-20 h-20 rounded-full bg-teal-600 hover:bg-teal-700 shadow-lg hover:shadow-xl transition-all duration-200 p-0"
-          onClick={() => {
-            // Handle support chat click
-            console.log("Support chat clicked")
-            alert("Support chat would open here")
-          }}
+          onClick={handleOpenSupportChat}
         >
           <img src="/support-icon.png" alt="Customer Support" className="w-12 h-12" />
         </Button>
