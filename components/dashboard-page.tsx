@@ -7,7 +7,7 @@ import Link from "next/link"
 import { useAuth } from "../contexts/auth-context"
 
 interface DashboardPageProps {
-  onOpenSupportChat?: () => void
+  onOpenSupportChat: () => void
 }
 
 export default function DashboardPage({ onOpenSupportChat }: DashboardPageProps) {
