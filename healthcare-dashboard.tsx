@@ -52,10 +52,6 @@ export default function Component() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState("dashboard")
 
-  const handleOpenSupportChat = () => {
-    window.open("https://holographic-shell-17q41m.sandbox.livekit.io", "_blank")
-  }
-
   if (!user) {
     return null // This will be handled by the main app component
   }
@@ -127,7 +123,7 @@ export default function Component() {
 
       {/* Content based on active tab */}
       {activeTab === "dashboard" ? (
-        <DashboardPage onOpenSupportChat={handleOpenSupportChat} />
+        <DashboardPage />
       ) : activeTab === "care" ? (
         /* Your care team content */
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -196,7 +192,7 @@ export default function Component() {
         <Button
           size="lg"
           className="w-20 h-20 rounded-full bg-teal-600 hover:bg-teal-700 shadow-lg hover:shadow-xl transition-all duration-200 p-0"
-          onClick={handleOpenSupportChat}
+          onClick={() => alert("Support chat coming soon! Please call 1-800-HEALTH for immediate assistance.")}
         >
           <img src="/support-icon.png" alt="Customer Support" className="w-12 h-12" />
         </Button>
