@@ -9,7 +9,6 @@ import { useAuth } from "./contexts/auth-context"
 import { useState } from "react"
 import DashboardPage from "./components/dashboard-page"
 import PlanPage from "./components/plan-page"
-import VoiceAssistant from "./components/voice-assistant"
 
 function UserMenu() {
   const { user, logout } = useAuth()
@@ -52,10 +51,9 @@ function UserMenu() {
 export default function Component() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState("dashboard")
-  const [isVoiceAssistantOpen, setIsVoiceAssistantOpen] = useState(false)
 
   const handleOpenSupportChat = () => {
-    setIsVoiceAssistantOpen(true)
+    window.open("https://holographic-shell-17q41m.sandbox.livekit.io", "_blank")
   }
 
   if (!user) {
@@ -203,7 +201,6 @@ export default function Component() {
           <img src="/support-icon.png" alt="Customer Support" className="w-12 h-12" />
         </Button>
       </div>
-      <VoiceAssistant isOpen={isVoiceAssistantOpen} onClose={() => setIsVoiceAssistantOpen(false)} />
     </div>
   )
 }
