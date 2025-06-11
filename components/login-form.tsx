@@ -35,19 +35,9 @@ export default function LoginForm() {
 
   const demoUsers = [
     {
-      name: "John Smith",
-      email: "patient@healthpartners.com",
-      condition: "Skin care specialist visit",
-    },
-    {
-      name: "Sara Mitchell",
-      email: "sara.mitchell@healthpartners.com",
-      condition: "UTI treatment",
-    },
-    {
-      name: "John Doe",
-      email: "john.doe@healthpartners.com",
-      condition: "Annual physical exam",
+      name: "Tina Fey",
+      email: "tina.fey@healthpartners.com",
+      condition: "Comedy wellness check",
     },
   ]
 

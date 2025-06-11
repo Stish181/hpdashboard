@@ -27,43 +27,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Mock user database
 const mockUsers: Record<string, User> = {
-  "patient@healthpartners.com": {
+  "tina.fey@healthpartners.com": {
     id: "1",
-    name: "John Smith",
-    email: "patient@healthpartners.com",
-    initials: "JS",
+    name: "Tina Fey",
+    email: "tina.fey@healthpartners.com",
+    initials: "TF",
     eobData: {
-      provider: "Associated Skin Care Specialists",
-      date: "9/9/2024",
-      totalCost: "$358.00",
-      responsibility: "$0.00",
-      description: "Dermatology consultation and treatment",
-    },
-  },
-  "sara.mitchell@healthpartners.com": {
-    id: "2",
-    name: "Sara Mitchell",
-    email: "sara.mitchell@healthpartners.com",
-    initials: "SM",
-    eobData: {
-      provider: "Urgent Care Center",
-      date: "12/15/2024",
-      totalCost: "$185.00",
-      responsibility: "$25.00",
-      description: "UTI diagnosis and treatment",
-    },
-  },
-  "john.doe@healthpartners.com": {
-    id: "3",
-    name: "John Doe",
-    email: "john.doe@healthpartners.com",
-    initials: "JD",
-    eobData: {
-      provider: "Family Medicine Clinic",
-      date: "11/22/2024",
-      totalCost: "$420.00",
-      responsibility: "$50.00",
-      description: "Annual physical exam and lab work",
+      provider: "Comedy Central Medical",
+      date: "12/20/2024",
+      totalCost: "$275.00",
+      responsibility: "$35.00",
+      description: "Annual comedy wellness check and stress management",
     },
   },
 }
