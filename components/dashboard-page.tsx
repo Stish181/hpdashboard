@@ -96,7 +96,7 @@ export default function DashboardPage({}: DashboardPageProps) {
                   </CardDescription>
                   <Button
                     className="bg-blue-600 hover:bg-blue-700"
-                    onClick={() => window.open("YOUR_CLARA_URL_HERE", "_blank")}
+                    onClick={() => window.open("https://holographic-shell-17q41m.sandbox.livekit.io/", "_blank")}
                   >
                     Find care with Clara
                   </Button>
