@@ -5,23 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Calendar, FileText, CreditCard, Receipt, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "../contexts/auth-context"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 
-interface DashboardPageProps {
-  onOpenSupportChat: () => void
-}
+type DashboardPageProps = {}
 
-export default function DashboardPage({ onOpenSupportChat }: DashboardPageProps) {
+export default function DashboardPage({}: DashboardPageProps) {
   const { user } = useAuth()
 
   if (!user) return null
@@ -107,30 +94,12 @@ export default function DashboardPage({ onOpenSupportChat }: DashboardPageProps)
                     urgency, and available options. Tell Clara how you're feeling. She'll gently walk you through next
                     steps and get you the help you need.
                   </CardDescription>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button className="bg-blue-600 hover:bg-blue-700">Find care with Clara</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Connect with Clara</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          You're about to connect with Clara, our AI-powered healthcare assistant. This will open a new
-                          window where you can have a voice conversation with Clara about your symptoms and care
-                          options.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => window.open("https://holographic-shell-17q41m.sandbox.livekit.io", "_blank")}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          Connect with Clara
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={() => window.open("https://holographic-shell-17q41m.sandbox.livekit.io/", "_blank")}
+                  >
+                    Find care with Clara
+                  </Button>
                 </div>
               </CardContent>
             </Card>
