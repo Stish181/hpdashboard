@@ -96,7 +96,7 @@ export default function DashboardPage({}: DashboardPageProps) {
                   </CardDescription>
                   <Button
                     className="bg-blue-600 hover:bg-blue-700"
-                    onClick={() => alert("Clara AI assistant coming soon! This feature is currently in development.")}
+                    onClick={() => window.open("YOUR_CLARA_URL_HERE", "_blank")}
                   >
                     Find care with Clara
                   </Button>
